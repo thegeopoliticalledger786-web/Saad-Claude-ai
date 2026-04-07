@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Hafiz Saad Claude AI</title>
     <script src="https://js.puter.com/v2/"></script>
     <style>
@@ -10,6 +10,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -17,12 +18,14 @@
             background-color: #1a1a1a;
             color: #e5e5e5;
             height: 100vh;
+            height: -webkit-fill-available;
             overflow: hidden;
         }
 
         .container {
             display: flex;
             height: 100vh;
+            height: -webkit-fill-available;
         }
 
         /* Sidebar */
@@ -33,6 +36,7 @@
             display: flex;
             flex-direction: column;
             transition: transform 0.3s ease;
+            flex-shrink: 0;
         }
 
         .sidebar-header {
@@ -60,7 +64,7 @@
             font-size: 14px;
             padding: 8px 0;
             cursor: pointer;
-            transition: opacity 0.2s;
+            width: 100%;
         }
 
         .plus-icon {
@@ -94,7 +98,6 @@
             color: #b3b3b3;
             font-size: 13px;
             cursor: pointer;
-            transition: color 0.2s;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -131,17 +134,18 @@
             flex-direction: column;
             background-color: #1a1a1a;
             position: relative;
+            min-width: 0;
         }
 
         .content-area {
             flex: 1;
             display: flex;
             flex-direction: column;
-            padding: 20px;
             max-width: 800px;
             margin: 0 auto;
             width: 100%;
             position: relative;
+            height: 100%;
         }
 
         .welcome-screen {
@@ -157,8 +161,7 @@
         .chat-container {
             display: none;
             flex-direction: column;
-            height: 100vh;
-            max-height: 100vh;
+            height: 100%;
             overflow: hidden;
         }
 
@@ -175,7 +178,7 @@
         }
 
         .message {
-            margin-bottom: 24px;
+            margin-bottom: 20px;
             display: flex;
             gap: 12px;
         }
@@ -205,6 +208,7 @@
             line-height: 1.5;
             word-wrap: break-word;
             white-space: pre-wrap;
+            font-size: 15px;
         }
 
         .message.user .message-content { background-color: #ff6b35; color: white; }
@@ -244,18 +248,40 @@
                 z-index: 1001;
                 height: 100%;
                 transform: translateX(-100%);
+                width: 240px;
             }
             .sidebar.open { transform: translateX(0); }
-            .message-content { max-width: 90%; }
-            .whatsapp-float { bottom: 80px; right: 15px; }
+            
+            .message-content { max-width: 90%; font-size: 14px; }
+            .whatsapp-float { bottom: 90px; right: 15px; }
             .float-btn { width: 45px; height: 45px; }
+            
+            .search-container {
+                padding: 10px;
+                padding-bottom: env(safe-area-inset-bottom, 10px);
+            }
+            
+            .search-input {
+                padding: 12px 80px 12px 12px;
+                font-size: 14px;
+            }
+            
+            .send-btn {
+                padding: 6px 12px;
+                font-size: 13px;
+            }
+
+            .welcome-screen h1 {
+                font-size: 24px;
+            }
         }
 
-        /* Search Bar */
+        /* Search Bar Sticky to Bottom */
         .search-container {
             width: 100%;
-            padding: 20px;
+            padding: 15px;
             background-color: #1a1a1a;
+            border-top: 1px solid #333;
         }
 
         .search-input-wrapper {
@@ -266,13 +292,19 @@
 
         .search-input {
             width: 100%;
-            padding: 14px 100px 14px 16px;
+            padding: 14px 90px 14px 16px;
             background-color: #262626;
             border: 1px solid #404040;
             border-radius: 12px;
             color: #fff;
             outline: none;
             resize: none;
+            display: block;
+            font-family: inherit;
+        }
+
+        .search-input:focus {
+            border-color: #ff6b35;
         }
 
         .send-btn {
@@ -286,13 +318,14 @@
             padding: 8px 16px;
             border-radius: 8px;
             cursor: pointer;
+            font-weight: 600;
         }
 
         /* Puter Auth Overlay */
         #authOverlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.9);
             display: none;
             flex-direction: column;
             align-items: center;
@@ -308,39 +341,63 @@
             border-radius: 16px;
             border: 1px solid #404040;
             max-width: 400px;
+            width: 100%;
         }
 
         .auth-btn {
             background: #ff6b35;
             color: white;
             border: none;
-            padding: 12px 24px;
+            padding: 14px 28px;
             border-radius: 8px;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
             margin-top: 20px;
+            width: 100%;
+            font-size: 16px;
+            text-transform: uppercase;
+        }
+
+        /* Menu Toggle for Mobile */
+        .menu-toggle {
+            display: none;
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            z-index: 1002;
+            background: #262626;
+            border: 1px solid #404040;
+            color: white;
+            padding: 8px;
+            border-radius: 6px;
+        }
+
+        @media (max-width: 768px) {
+            .menu-toggle { display: block; }
         }
     </style>
 </head>
 <body>
     <div id="authOverlay">
         <div class="auth-card">
-            <h2>Welcome to Saad Claude AI</h2>
-            <p style="margin: 15px 0; color: #b3b3b3;">Please authenticate with Puter.js to get your free AI access key and start chatting.</p>
-            <button class="auth-btn" onclick="authenticate()">Authenticate with Puter</button>
+            <h2 style="color: #ff6b35;">Welcome to Saad Claude AI</h2>
+            <p style="margin: 20px 0; color: #b3b3b3; line-height: 1.6;">Join thousands of users! Sign up with Puter.js to unlock your free personal AI assistant.</p>
+            <button class="auth-btn" onclick="authenticate()">Sign Up / Log In Now</button>
         </div>
     </div>
+
+    <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
 
     <div class="container">
         <div class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <div class="logo">Claude</div>
+                <div class="logo">Claude AI</div>
                 <button class="new-chat-btn" onclick="startNewChat()">
                     <div class="plus-icon">+</div> New chat
                 </button>
             </div>
             <div class="sidebar-content">
-                <div class="section-title">Recents</div>
+                <div class="section-title">Recent Conversations</div>
                 <div id="recentItems"></div>
             </div>
             <div class="sidebar-footer">
@@ -357,7 +414,7 @@
         <div class="main-content">
             <div class="content-area">
                 <div class="welcome-screen" id="welcomeScreen">
-                    <h1 style="margin-bottom: 20px;">Good morning, Hafiz Saad</h1>
+                    <h1 style="margin-bottom: 25px;">Good morning, Hafiz Saad</h1>
                     <div class="search-input-wrapper" style="width: 100%;">
                         <textarea class="search-input" id="welcomeInput" placeholder="How can I help you today?" rows="1"></textarea>
                         <button class="send-btn" onclick="handleInitialMessage()">Send</button>
@@ -401,7 +458,8 @@ Agar aap ko kisi bhi help ki zarurat ho ya online commission-based kaam karna ch
 
         async function authenticate() {
             try {
-                const result = await puter.ui.authenticate();
+                // Using the specific sign-in method for more direct signup
+                const result = await puter.auth.signIn();
                 if (result) {
                     document.getElementById('authOverlay').style.display = 'none';
                     checkAuth();
@@ -419,14 +477,29 @@ Agar aap ko kisi bhi help ki zarurat ho ya online commission-based kaam karna ch
             }
         }
 
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             checkAuth();
+            
+            // Auto-resize inputs and focus
             const welcomeInput = document.getElementById('welcomeInput');
-            welcomeInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleInitialMessage();
-                }
+            const chatInput = document.getElementById('chatInput');
+
+            [welcomeInput, chatInput].forEach(input => {
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        if (input.id === 'welcomeInput') handleInitialMessage();
+                        else handleChatMessage();
+                    }
+                });
+                input.addEventListener('input', function() {
+                    this.style.height = 'auto';
+                    this.style.height = (this.scrollHeight) + 'px';
+                });
             });
         });
 
@@ -447,12 +520,16 @@ Agar aap ko kisi bhi help ki zarurat ho ya online commission-based kaam karna ch
             if (msg) {
                 sendMessage(msg);
                 input.value = '';
+                input.style.height = 'auto';
             }
         }
 
         function switchToChatView() {
             document.getElementById('welcomeScreen').style.display = 'none';
             document.getElementById('chatContainer').classList.add('active');
+            if (window.innerWidth <= 768) {
+                document.getElementById('sidebar').classList.remove('open');
+            }
         }
 
         function addMessage(content, role) {
@@ -472,7 +549,13 @@ Agar aap ko kisi bhi help ki zarurat ho ya online commission-based kaam karna ch
             chatHistory.push({ role: 'user', content: userMsg });
             
             try {
-                const response = await puter.ai.chat(chatHistory, { model: 'gpt-4o' });
+                // Updated with system prompt instructions for identity
+                const historyWithSystem = [
+                    { role: 'system', content: "You are Hafiz Saad Sir's AI. Always be helpful and polite. Refer to Hafiz Saad as 'Saad Sir' or 'Saad Bhai'." },
+                    ...chatHistory
+                ];
+                
+                const response = await puter.ai.chat(historyWithSystem, { model: 'gpt-4o' });
                 const aiMsg = response.message.content;
                 addMessage(aiMsg, 'assistant');
                 chatHistory.push({ role: 'assistant', content: aiMsg });
@@ -486,6 +569,9 @@ Agar aap ko kisi bhi help ki zarurat ho ya online commission-based kaam karna ch
             document.getElementById('chatMessages').innerHTML = '';
             document.getElementById('welcomeScreen').style.display = 'flex';
             document.getElementById('chatContainer').classList.remove('active');
+            if (window.innerWidth <= 768) {
+                document.getElementById('sidebar').classList.remove('open');
+            }
         }
     </script>
 </body>
